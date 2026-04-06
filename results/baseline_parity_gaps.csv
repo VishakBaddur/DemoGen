@@ -1,0 +1,10 @@
+condition,group_col,metric,group_pair,gap
+baseline,perceived_race,length,Black_vs_Asian,2.0146198830409503
+baseline,perceived_race,length,Black_vs_White,5.636842105263156
+baseline,perceived_race,length,Asian_vs_White,3.622222222222206
+baseline,perceived_race,readability,Black_vs_Asian,0.10637164481933326
+baseline,perceived_race,readability,Black_vs_White,0.592044622441243
+baseline,perceived_race,readability,Asian_vs_White,0.48567297762190975
+baseline,perceived_race,sentiment,Black_vs_Asian,9.444444444439704e-05
+baseline,perceived_race,sentiment,Black_vs_White,0.00019000000000002348
+baseline,perceived_race,sentiment,Asian_vs_White,9.555555555562645e-05

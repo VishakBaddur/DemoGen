@@ -1,0 +1,13 @@
+groq
+openai
+pandas
+numpy
+scipy
+nltk
+textstat
+tqdm
+matplotlib
+seaborn
+python-dotenv
+jupyter
+

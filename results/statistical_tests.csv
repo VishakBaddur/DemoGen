@@ -1,0 +1,13 @@
+condition,metric,test_type,group_col,group1,group2,p_value,p_value_bonferroni,cohens_d
+baseline,length,one_way_anova,perceived_race,,,0.7001531332693821,0.7001531332693821,
+baseline,readability,one_way_anova,perceived_race,,,0.38138325776747906,0.38138325776747906,
+baseline,sentiment,one_way_anova,perceived_race,,,0.586122008226612,0.586122008226612,
+baseline,llm_quality,one_way_anova,perceived_race,,,,,
+baseline,length,pairwise_ttest,perceived_race,White,Black,0.34768401495577195,0.6953680299115439,0.3030446138274046
+baseline,length,pairwise_ttest,perceived_race,White,Asian,0.6365692299727996,1.0,0.15682472583205614
+baseline,readability,pairwise_ttest,perceived_race,White,Black,0.182955652373321,0.365911304746642,0.43330346375568846
+baseline,readability,pairwise_ttest,perceived_race,White,Asian,0.3179608543063906,0.6359217086127812,0.3296418226795366
+baseline,sentiment,pairwise_ttest,perceived_race,White,Black,0.30370015904360487,0.6074003180872097,0.34053827038402074
+baseline,sentiment,pairwise_ttest,perceived_race,White,Asian,0.5669755601844402,1.0,0.19253423072256534
+baseline,llm_quality,pairwise_ttest,perceived_race,White,Black,,,
+baseline,llm_quality,pairwise_ttest,perceived_race,White,Asian,,,

@@ -1,0 +1,201 @@
+\documentclass{article}
+
+% Lightweight NeurIPS-style draft layout
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{float}
+
+\title{DemoGen: Auditing Demographic Bias in LLM-Generated Content (Intermediate Report)}
+\author{CS 517 (UIC) -- Socially Responsible AI}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Large language models can produce outputs that vary systematically across demographic groups when demographic cues are present in prompts. 
+DemoGen audits demographic bias in LLM-generated content by comparing multiple prompting conditions and measuring disparities using quantitative metrics. 
+In this intermediate milestone, we focus on a subset of prompts and a single task type (cover letter writing) to validate our generation and audit pipeline. 
+We compute readability, sentiment, and response length for baseline cover letter responses and evaluate whether differences across racial groups are statistically significant. 
+We also quantify demographic parity gaps to characterize the magnitude of potential disparities. 
+Algorithmic mitigation approaches (persona-blind prompting and self-consistency reranking) are planned but not yet implemented at this stage.
+\end{abstract}
+
+\section{Introduction}
+Large language models (LLMs) are trained on large-scale text corpora that may reflect societal inequalities. 
+When prompts include demographic cues (e.g., names associated with race or gender), model outputs may differ in quality or tone. 
+Understanding and reducing such disparities is important for deploying LLMs responsibly, especially in high-stakes domains such as hiring and education.
+
+DemoGen audits demographic bias in LLM-generated content and evaluates mitigation strategies. 
+The full study compares a baseline condition (standard prompting with demographic cues) against planned mitigation algorithms.
+
+\section{Related Work}
+Prior work has established the relevance of demographic signals in language-mediated decisions and model behavior. Bertrand and Mullainathan (2004) show strong name-based disparities in hiring callbacks, motivating demographic-audit designs for downstream writing tasks. Caliskan et al. (2017) demonstrate that statistical language representations can encode social associations from training corpora, which motivates evaluating bias not only in classifiers but also in generated text.
+
+Recent fairness work in NLP and LLMs has emphasized robust bias measurement and benchmark design. Borkan et al. (2019) provide practical bias metrics for model evaluation, while Gallegos et al. (2024) synthesize evaluation and mitigation directions for modern LLM systems. More recent benchmarks such as LABE (Wan and Chang, 2025) and SAGED (Guan et al., 2025) further highlight that social-bias effects can persist in generation settings and may require task-aware mitigation.
+
+Existing resources such as BBQ and WinoBias are important validation benchmarks, but they are less aligned with this project's target setting of open-ended long-form generation (e.g., cover letters and recommendation-style writing). For this reason, DemoGen uses a custom prompt suite as the primary evaluation dataset and treats benchmark datasets as secondary validation.
+
+\section{Methodology}
+
+\subsection{Prompt Suite Design}
+We construct a prompt suite by combining demographic-associated names with task templates across multiple task types. 
+For the intermediate milestone, we run baseline generation only for the \texttt{cover\_letter} task type using a stratified subset of prompts (100+ prompts overall, with a smaller cover-letter subset generated for auditing).
+Race labels correspond to demographic associations commonly used in audit studies based on prior name-list literature.
+Although the full project includes race, gender, and SES analyses, this intermediate report audits race only to validate the pipeline under constrained time and API budget; gender and SES analyses are deferred to the final study.
+
+\subsection{LLM Conditions}
+The intermediate milestone includes only the baseline condition:
+\begin{itemize}
+  \item \textbf{Baseline:} standard prompting with demographic cues present.
+  \item \textbf{Algorithm 1 (Persona-blind):} planned removal of demographic cues from prompts.
+  \item \textbf{Algorithm 2 (Self-consistency reranking):} planned generation of multiple candidates and selection based on minimizing disparity.
+\end{itemize}
+
+\subsection{Metrics}
+For each response, we compute:
+\begin{itemize}
+  \item \textbf{Length:} word count.
+  \item \textbf{Readability:} Flesch--Kincaid Grade Level.
+  \item \textbf{Sentiment:} VADER compound sentiment score in $[-1,1]$.
+  \item \textbf{(Planned) LLM-as-judge quality:} rubric-based scoring, deferred to later phases to reduce API cost during pipeline validation.
+\end{itemize}
+VADER is used here as a lightweight and reproducible baseline metric for intermediate analysis; we plan to compare it against stronger semantic evaluators in the final study.
+
+\subsection{Statistical Tests}
+We run a one-way ANOVA across racial groups for each metric on baseline responses. 
+We report $p$-values to assess statistical significance and also report pairwise Cohen's $d$ effect sizes to quantify practical significance independent of statistical power.
+
+\section{Preliminary Results}
+
+\subsection{Mean Metrics by Racial Group}
+Figures below show mean baseline response metrics by perceived race.
+The current intermediate baseline sample contains $N=57$ total responses (White $n=20$, Black $n=19$, Asian $n=18$).
+This subset size is intentionally limited for intermediate pipeline validation before scaling to the full prompt suite.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\linewidth]{results/figures/baseline_mean_length_by_race.png}
+\caption{Mean response length by racial group (baseline condition).}
+\label{fig:mean_length}
+\end{figure}
+Figure~\ref{fig:mean_length} shows modest length differences across groups, with White-associated names receiving slightly longer responses on average in this subset.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\linewidth]{results/figures/baseline_mean_readability_by_race.png}
+\caption{Mean readability by racial group (baseline condition).}
+\label{fig:mean_readability}
+\end{figure}
+Figure~\ref{fig:mean_readability} shows small readability differences; all group means remain in a narrow grade-level range.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\linewidth]{results/figures/baseline_mean_sentiment_by_race.png}
+\caption{Mean sentiment by racial group (baseline condition).}
+\label{fig:mean_sentiment}
+\end{figure}
+Figure~\ref{fig:mean_sentiment} is visually compressed because VADER sentiment scores are near the upper bound for professional cover-letter text (a ceiling effect), so between-group variation appears very small.
+
+\paragraph{ANOVA Summary.}
+One-way ANOVA tests across racial groups were performed for each metric.
+
+\begin{center}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Metric & ANOVA $p$-value & Pairwise Cohen's $d$ (W-B / W-A) & Notes \\
+\midrule
+Length & 0.7002 & 0.303 / 0.157 & No significant group difference \\
+Readability & 0.3814 & 0.433 / 0.330 & No significant group difference \\
+Sentiment & 0.5861 & 0.341 / 0.193 & No significant group difference \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+None of the metrics reach conventional statistical significance in this subset. That outcome is expected in part because the sample is intentionally small ($N=57$) for pipeline validation before scaling generation, so statistical power to detect group differences is limited. At the same time, parity gaps are largest for length and negligible for sentiment: cover letters follow a constrained professional format that tends to suppress overt sentiment variation (and VADER scores cluster near the positive ceiling) while still allowing some flexibility in verbosity and structure. Readability falls between these extremes. Together, these patterns suggest that response length may be the most sensitive of the three metrics for surfacing demographic disparities in this task type, motivating prioritization of length in the full study alongside expanded $N$ and additional metrics.
+
+\subsection{Demographic Parity Gaps}
+We compute demographic parity gaps as absolute mean differences between all pairs of racial groups.
+
+\paragraph{Length parity gaps (word count).}
+\begin{itemize}
+  \item Black vs White: 5.6368
+  \item Asian vs White: 3.6222
+  \item Black vs Asian: 2.0146
+\end{itemize}
+
+\paragraph{Readability parity gaps (Flesch--Kincaid grade level).}
+\begin{itemize}
+  \item Black vs White: 0.5920
+  \item Asian vs White: 0.4857
+  \item Black vs Asian: 0.1064
+\end{itemize}
+
+\paragraph{Sentiment parity gaps (VADER compound score).}
+\begin{itemize}
+  \item Black vs White: 0.000190
+  \item Asian vs White: 0.0000956
+  \item Black vs Asian: 0.0000944
+\end{itemize}
+
+Overall, preliminary parity gaps are larger for response length than for sentiment in this baseline subset. 
+Sentiment gaps are extremely small, which may indicate limited sentiment variation across groups in this task or limited sensitivity of VADER for subtle tone differences in professional cover-letter writing.
+
+Across all reported metrics, ANOVA results are not statistically significant in this baseline subset. We therefore treat these findings as preliminary and will reassess with the full 500+ prompt suite and additional metrics.
+
+\section{Current Challenges and Next Steps}
+At this intermediate stage:
+\begin{itemize}
+  \item Algorithm 1 and Algorithm 2 are planned but not yet implemented.
+  \item Only the \texttt{cover\_letter} task type has been audited.
+  \item The full prompt suite (500+ prompts) is still in progress.
+  \item LLM-as-judge quality scoring is deferred to reduce early experimentation costs.
+\end{itemize}
+
+Next steps:
+\begin{itemize}
+  \item Implement mitigation algorithms and rerun experiments.
+  \item Add LLM-as-judge quality evaluation.
+  \item Expand statistical reporting and visualizations.
+\end{itemize}
+
+\textbf{Preliminary takeaway.} Taken together, these results suggest the pipeline is functioning correctly and that response length is the most promising signal for detecting demographic disparities in cover-letter generation, to be confirmed at scale with the full prompt suite and mitigation experiments.
+
+\section{References}
+\begin{thebibliography}{9}
+
+\bibitem{bertrand2004}
+Bertrand, M., and Mullainathan, S. (2004).
+Are Emily and Greg more employable than Lakisha and Jamal?
+American Economic Review, 94(4), 991--1013.
+
+\bibitem{caliskan2017}
+Caliskan, A., Bryson, J. J., and Narayanan, H. (2017).
+Semantics derived automatically from language corpora contain human-like biases.
+Science, 356(6334), 183--186.
+
+\bibitem{borkan2019}
+Borkan, D., Dixon, L., Sorensen, J., Thain, N., and Vasserman, L. (2019).
+Nuanced metrics for measuring unintended bias with real data for text classification.
+Proceedings of the 2019 AAAI/ACM Conference on AI, Ethics, and Society (AIES 2019), 491--500.
+
+\bibitem{gallegos2024}
+Gallegos, I. O., Rossi, R. A., Barrow, J., et al. (2024).
+Bias and Fairness in Large Language Models: A Survey.
+\textit{Computational Linguistics}, 50(3), 1097--1179.
+
+\bibitem{wan2025}
+Wan, Y., and Chang, K.-W. (2025).
+White Men Lead, Black Women Help? Benchmarking and Mitigating Language Agency Social Biases in LLMs.
+In \textit{Proceedings of ACL 2025}, pages 9082--9108.
+
+\bibitem{guan2025}
+Guan, X., Demchak, N., Gupta, S., Wang, Z., Ertekin Jr., E., Koshiyama, A., Kazim, E., and Wu, Z. (2025).
+SAGED: A Holistic Bias-Benchmarking Pipeline for Language Models with Customisable Fairness Calibration.
+In \textit{Proceedings of COLING 2025}, pages 3002--3026.
+
+\end{thebibliography}
+
+\end{document}
