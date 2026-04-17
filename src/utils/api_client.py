@@ -118,6 +118,32 @@ class UnifiedAPIClient:
                 return True
         return False
 
+    def _is_transient_network_error(self, err: Exception) -> bool:
+        """Detect flaky network / transport errors worth retrying (not 4xx logic bugs)."""
+        msg = str(err).lower()
+        if "connection error" in msg or "connection reset" in msg:
+            return True
+        if "timeout" in msg or "timed out" in msg:
+            return True
+        if "remote protocol" in msg or "broken pipe" in msg:
+            return True
+        try:
+            import httpx
+
+            if isinstance(
+                err,
+                (
+                    httpx.ConnectError,
+                    httpx.ReadTimeout,
+                    httpx.WriteTimeout,
+                    httpx.RemoteProtocolError,
+                ),
+            ):
+                return True
+        except ImportError:
+            pass
+        return False
+
     def _retry_after_seconds(self, err: Exception) -> Optional[float]:
         """Parse Retry-After header from httpx HTTPStatusError if present."""
         try:
@@ -241,14 +267,20 @@ class UnifiedAPIClient:
                 self._append_api_log(record)
                 return APIResult(text=text, model_used=self.groq_model)
             except Exception as e:
-                if self._is_rate_limit_error(e) and attempt < (max_retries - 1):
-                    ra = self._retry_after_seconds(e)
-                    if ra is not None and ra > 0:
-                        wait = min(ra + random.random() * 0.5, 120.0)
+                retryable = self._is_rate_limit_error(e) or self._is_transient_network_error(e)
+                if retryable and attempt < (max_retries - 1):
+                    if self._is_rate_limit_error(e):
+                        ra = self._retry_after_seconds(e)
+                        if ra is not None and ra > 0:
+                            wait = min(ra + random.random() * 0.5, 120.0)
+                        else:
+                            backoff = (2**attempt) * 2.0
+                            jitter = random.random() * 0.5
+                            wait = backoff + jitter
                     else:
-                        backoff = (2**attempt) * 2.0
-                        jitter = random.random() * 0.5
-                        wait = backoff + jitter
+                        backoff = (2**attempt) * 1.5
+                        jitter = random.random()
+                        wait = min(backoff + jitter, 60.0)
                     time.sleep(wait)
                     continue
                 raise

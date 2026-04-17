@@ -5,7 +5,7 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 import pandas as pd
@@ -47,6 +47,7 @@ def compute_metrics(
     skip_llm_quality: bool,
     api_client: Any = None,
     include_sentiment: bool = True,
+    existing_llm_quality: Optional[Dict[str, float]] = None,
 ) -> pd.DataFrame:
     """Compute length, readability, optional VADER sentiment, and (by default) LLM-as-judge quality."""
     df = df.copy()
@@ -57,15 +58,22 @@ def compute_metrics(
     else:
         df["sentiment"] = np.nan
 
+    existing_llm_quality = existing_llm_quality or {}
+
     if skip_llm_quality:
         df["llm_quality"] = np.nan
     else:
         if api_client is None:
             raise ValueError("api_client must be provided when skip_llm_quality is False")
-        df["llm_quality"] = [
-            measure_llm_quality(text=row["response_text"], task_type=str(row["task_type"]), api_client=api_client)
-            for _, row in df.iterrows()
-        ]
+        scores: List[float] = []
+        for _, row in df.iterrows():
+            pid = str(row["prompt_id"])
+            if pid in existing_llm_quality:
+                scores.append(float(existing_llm_quality[pid]))
+                continue
+            score = measure_llm_quality(text=row["response_text"], task_type=str(row["task_type"]), api_client=api_client)
+            scores.append(score)
+        df["llm_quality"] = scores
 
     return df
 
@@ -126,6 +134,11 @@ def main() -> None:
     )
     parser.add_argument("--gemini_model", type=str, default="gemini-1.5-flash")
     parser.add_argument("--openai_model", type=str, default="gpt-3.5-turbo")
+    parser.add_argument(
+        "--resume_audit",
+        action="store_true",
+        help="Reuse llm_quality from existing results/<condition>_audit.csv and score only missing rows.",
+    )
     args = parser.parse_args()
 
     load_dotenv()
@@ -140,6 +153,23 @@ def main() -> None:
     df_suite = pd.read_csv(prompt_suite_path)[["prompt_id", "perceived_ses"]]
     df_suite["prompt_id"] = df_suite["prompt_id"].astype(str)
     df_resp = df_resp.merge(df_suite, on="prompt_id", how="left")
+
+    out_path = Path("results") / f"{condition}_audit.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+
+    existing_llm_quality: Dict[str, float] = {}
+    if args.resume_audit and out_path.exists():
+        try:
+            df_prev = pd.read_csv(out_path)
+            if "prompt_id" in df_prev.columns and "llm_quality" in df_prev.columns:
+                df_prev["prompt_id"] = df_prev["prompt_id"].astype(str)
+                sub_prev = df_prev.dropna(subset=["llm_quality"])[["prompt_id", "llm_quality"]]
+                existing_llm_quality = {
+                    str(pid): float(score) for pid, score in sub_prev.itertuples(index=False, name=None)
+                }
+                print(f"Resuming audit with {len(existing_llm_quality)} existing llm_quality scores from {out_path}")
+        except Exception as e:
+            print(f"[WARN] Could not read existing audit for resume: {e}")
 
     # Compute metrics.
     api_client = None
@@ -156,6 +186,7 @@ def main() -> None:
         skip_llm_quality=args.skip_llm_quality,
         api_client=api_client,
         include_sentiment=args.include_sentiment,
+        existing_llm_quality=existing_llm_quality,
     )
     df_metrics["condition"] = condition
 
@@ -174,8 +205,6 @@ def main() -> None:
         "condition",
     ]
 
-    out_path = Path("results") / f"{condition}_audit.csv"
-    out_path.parent.mkdir(parents=True, exist_ok=True)
     df_metrics[out_cols].to_csv(out_path, index=False)
 
     # Compute and save parity gaps for requested group columns.
@@ -202,7 +231,7 @@ def main() -> None:
                     }
                 )
             if args.parity_by_task:
-                for row in parity_gaps_by_task_type(df_metrics, metrics_cols=[metric_col], group_col=group_col):
+                for row in parity_gaps_by_task_type(df_metrics, metric_cols=[metric_col], group_col=group_col):
                     row["condition"] = condition
                     task_parity_rows.append(row)
 

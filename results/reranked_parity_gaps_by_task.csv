@@ -1,0 +1,16 @@
+task_type,metric,group_col,max_pairwise_gap,condition
+advice_giving,llm_quality,perceived_race,0.0,reranked
+concept_explanation,llm_quality,perceived_race,0.11507936507936556,reranked
+cover_letter,llm_quality,perceived_race,0.19444444444444464,reranked
+problem_solving,llm_quality,perceived_race,0.0,reranked
+recommendation_letter,llm_quality,perceived_race,0.0,reranked
+advice_giving,length,perceived_race,1.2222222222222285,reranked
+concept_explanation,length,perceived_race,16.47222222222223,reranked
+cover_letter,length,perceived_race,5.75,reranked
+problem_solving,length,perceived_race,18.75,reranked
+recommendation_letter,length,perceived_race,2.555555555555543,reranked
+advice_giving,readability,perceived_race,0.8566649426465531,reranked
+concept_explanation,readability,perceived_race,0.40769292338939245,reranked
+cover_letter,readability,perceived_race,0.69866329782589,reranked
+problem_solving,readability,perceived_race,0.9395564235591607,reranked
+recommendation_letter,readability,perceived_race,0.4996685385838777,reranked

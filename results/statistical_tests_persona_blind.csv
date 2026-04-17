@@ -1,0 +1,10 @@
+condition,metric,test_type,group_col,group1,group2,p_value,p_value_bonferroni,cohens_d
+persona_blind,llm_quality,one_way_anova,perceived_race,,,0.4915539030299648,0.4915539030299648,
+persona_blind,length,one_way_anova,perceived_race,,,0.535045172723148,0.535045172723148,
+persona_blind,readability,one_way_anova,perceived_race,,,0.4486979136466912,0.4486979136466912,
+persona_blind,llm_quality,pairwise_ttest,perceived_race,White,Black,0.6535511709812911,1.0,-0.04735255867138574
+persona_blind,llm_quality,pairwise_ttest,perceived_race,White,Asian,0.4759581671955705,0.951916334391141,0.07522160506673693
+persona_blind,length,pairwise_ttest,perceived_race,White,Black,0.283516986149156,0.567033972298312,0.11322277144523654
+persona_blind,length,pairwise_ttest,perceived_race,White,Asian,0.43606396581099216,0.8721279316219843,0.08219150683316075
+persona_blind,readability,pairwise_ttest,perceived_race,White,Black,0.21749534292389971,0.43499068584779943,-0.1302230492016248
+persona_blind,readability,pairwise_ttest,perceived_race,White,Asian,0.6350470786265094,1.0,-0.05007410508914644

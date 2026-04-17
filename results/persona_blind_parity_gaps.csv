@@ -1,0 +1,10 @@
+condition,group_col,metric,group_pair,gap
+persona_blind,perceived_race,llm_quality,Asian_vs_White,0.011111111111111072
+persona_blind,perceived_race,llm_quality,Asian_vs_Black,0.016666666666666607
+persona_blind,perceived_race,llm_quality,White_vs_Black,0.005555555555555536
+persona_blind,perceived_race,length,Asian_vs_White,5.838888888888903
+persona_blind,perceived_race,length,Asian_vs_Black,1.805555555555543
+persona_blind,perceived_race,length,White_vs_Black,7.644444444444446
+persona_blind,perceived_race,readability,Asian_vs_White,0.1593522647725436
+persona_blind,perceived_race,readability,Asian_vs_Black,0.25668382560197145
+persona_blind,perceived_race,readability,White_vs_Black,0.41603609037451506
