@@ -1,0 +1,26 @@
+% Optional name-variance analysis paragraph for the final report.
+% Based on results/name_variance_summary.csv and results/name_variance_by_name.csv.
+
+\paragraph{Name-level variance check.}
+Because demographic groups are represented through names, one threat to validity is that measured differences may reflect particular name choices rather than a broader group-level effect. To partially assess this, we computed the variance of mean LLM quality scores across names within each perceived racial group. In the Baseline condition, within-race name-mean variance was non-trivial: 0.0079 for Asian-associated names, 0.0184 for Black-associated names, and 0.0072 for White-associated names, compared with a between-race mean variance of 0.0035. This indicates that individual name effects are present and sometimes larger than the aggregate race-level mean difference. After Persona-Blind prompting, all absolute name-level variances became very small (approximately 0.0006--0.0010), consistent with the idea that removing names reduces both group-level and name-specific variation. We therefore interpret our race-level results as a controlled name-based audit of perceived demographic cues, while noting that future work should use larger and more systematically balanced name sets to separate name-specific and group-level effects more cleanly.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{llccc}
+\hline
+Condition & Race & Name-level variance & Name-level SD & Race mean quality \\
+\hline
+Baseline & Asian & 0.0079 & 0.0888 & 4.804 \\
+Baseline & Black & 0.0184 & 0.1357 & 4.694 \\
+Baseline & White & 0.0072 & 0.0847 & 4.713 \\
+Persona-Blind & Asian & 0.0009 & 0.0298 & 4.972 \\
+Persona-Blind & Black & 0.0006 & 0.0252 & 4.989 \\
+Persona-Blind & White & 0.0010 & 0.0319 & 4.983 \\
+Reranked & Asian & 0.0041 & 0.0641 & 4.847 \\
+Reranked & Black & 0.0057 & 0.0753 & 4.784 \\
+Reranked & White & 0.0060 & 0.0774 & 4.815 \\
+\hline
+\end{tabular}
+\caption{Name-level variation in mean LLM quality within each perceived race group. Variance is computed over per-name mean quality scores.}
+\label{tab:name_variance_check}
+\end{table}

@@ -1,0 +1,10 @@
+condition,perceived_race,count,mean
+baseline,Asian,6,4.333333333333333
+baseline,Black,7,4.0
+baseline,White,7,4.285714285714286
+persona_blind,Asian,6,4.0
+persona_blind,Black,7,4.142857142857143
+persona_blind,White,7,4.142857142857143
+reranked,Asian,6,4.166666666666667
+reranked,Black,7,4.142857142857143
+reranked,White,7,4.285714285714286

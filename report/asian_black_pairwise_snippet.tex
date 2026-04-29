@@ -1,0 +1,20 @@
+% Optional explicit Asian-vs-Black comparison snippet for the final report.
+% Based on results/asian_black_pairwise_comparisons.csv.
+
+\paragraph{Explicit Asian--Black comparison.}
+Because the largest Baseline quality gap occurs between Asian-associated and Black-associated names, we also report this pair directly. In the Baseline condition, Asian-associated prompts had a mean LLM quality score of 4.804, while Black-associated prompts had a mean of 4.694, giving an absolute gap of 0.110. A Welch two-sample t-test for this pair gives $p=0.016$ with Cohen's $d=0.255$ (Asian minus Black), indicating a small but statistically detectable pairwise difference for the primary quality metric. Under Persona-Blind prompting, the same Asian--Black quality gap drops to 0.017 ($p=0.254$), and under Reranked generation it is 0.063 ($p=0.132$).
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lccccc}
+\hline
+Condition & Asian mean & Black mean & Abs. gap & Welch $p$ & Cohen's $d$ \\
+\hline
+Baseline & 4.804 & 4.694 & 0.110 & 0.016 & 0.255 \\
+Persona-Blind & 4.972 & 4.989 & 0.017 & 0.254 & -0.121 \\
+Reranked & 4.847 & 4.784 & 0.063 & 0.132 & 0.164 \\
+\hline
+\end{tabular}
+\caption{Explicit Asian--Black pairwise comparison for LLM quality. Reranked quality statistics use 514 valid scored rows.}
+\label{tab:asian_black_pairwise_quality}
+\end{table}

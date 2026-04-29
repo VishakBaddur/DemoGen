@@ -1,0 +1,20 @@
+% Optional robustness-check paragraph for the final report.
+% This is based on results/independent_judge_ollama_mistral_sample*.csv.
+
+\paragraph{Independent local-judge robustness check.}
+As a robustness check, we rescored a balanced 180-response subset using a local Mistral judge through Ollama, which is a different model family from the Groq-hosted Llama model used in the main pipeline. The subset contained 60 responses per condition and was balanced across perceived race groups (20 White, 20 Black, and 20 Asian per condition). The same broad fairness pattern held: the Baseline condition had a larger maximum racial quality gap (0.150) than Persona-Blind (0.100), while Reranked remained intermediate/similar to Baseline in this local-judge subset (0.150). Because this check uses a local model with coarse 4/5-heavy scores, we treat it as supporting evidence rather than as a replacement for the main full-dataset audit.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lcc}
+\hline
+Condition & Mean Mistral-judge quality & Max race quality gap \\
+\hline
+Baseline & 4.15 & 0.150 \\
+Persona-Blind & 4.05 & 0.100 \\
+Reranked & 4.22 & 0.150 \\
+\hline
+\end{tabular}
+\caption{Independent local-judge robustness check on a balanced 180-response subset using Mistral via Ollama.}
+\label{tab:mistral_robustness_check}
+\end{table}
