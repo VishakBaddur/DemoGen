@@ -8,16 +8,18 @@ Important current facts:
 
 - Project: DemoGen, CS 517 Socially Responsible AI, UIC.
 - Main question: Do LLM-generated responses change in quality when prompts include names associated with different perceived racial groups?
-- Conditions: baseline, persona-blind, reranked.
+- Conditions: baseline, persona-blind, reranked, and system prompt.
 - Full prompt suite: 540 prompts.
-- Full saved responses: 1,620 JSON files, 540 per condition.
+- Full saved response JSON files: 2,160 selected outputs, 540 per condition. Reranking also generated 2,030 candidate outputs internally.
 - Main metric: `llm_quality`, an LLM-as-judge score from 1 to 5.
 - Baseline max race gap on `llm_quality`: 0.110.
 - Persona-blind max race gap on `llm_quality`: 0.017.
 - Reranked max race gap on `llm_quality`: 0.063.
+- System-prompt max race gap on `llm_quality`: 0.072.
 - Baseline mean `llm_quality`: 4.737.
 - Persona-blind mean `llm_quality`: 4.981.
 - Reranked mean `llm_quality`: 4.815 over 514 valid scored rows.
+- System-prompt mean `llm_quality`: 4.831 over 540 valid scored rows.
 - Reranked had 26 missing/non-numeric `llm_quality` rows in `results/reranked_audit.csv`.
 - Reranked used mixed `k`: 205 prompts with `k=5`, 335 prompts with `k=3`, total 2,030 candidate generations.
 
@@ -45,13 +47,14 @@ Simpler version: If only the name changes, does the model write better or worse 
 
 ### Q: What did we find?
 
-In the baseline condition, there was a measurable race-linked quality gap. Persona-blind prompting reduced that gap strongly, and reranking reduced it partially. Persona-blind also had the highest measured average `llm_quality`.
+In the baseline condition, there was a measurable race-linked quality gap. Persona-blind prompting reduced that gap strongest, reranking reduced it partially, and the full 540-prompt system-prompt condition also reduced it partially. Persona-blind still had the highest measured average `llm_quality`.
 
 The simplest finding:
 
 - Baseline quality gap: 0.110.
 - Persona-blind quality gap: 0.017.
 - Reranked quality gap: 0.063.
+- System-prompt quality gap: 0.072.
 
 So persona-blind was the strongest mitigation for the primary quality metric.
 
@@ -135,6 +138,7 @@ In our project:
 
 - Persona-blind prompting is a mitigation.
 - Reranking is a mitigation.
+- System-prompt intervention is a mitigation.
 - Baseline is not a mitigation; it is the reference condition.
 
 ### Q: What is a parity gap?
@@ -292,11 +296,12 @@ If asked, say: a second dataset would strengthen external validation, but our co
 
 ## 6. Generation Conditions
 
-### Q: What are the three conditions?
+### Q: What are the four conditions?
 
 1. Baseline.
 2. Persona-blind.
 3. Reranked.
+4. System prompt.
 
 ### Q: What is baseline?
 
@@ -367,6 +372,28 @@ Yes, it is a limitation. It makes the reranked condition less clean than a fully
 Good wording:
 
 "The reranked condition used a mixed candidate budget because of API/runtime constraints: 205 prompts used `k=5` and 335 used `k=3`, yielding 2,030 candidate generations. This should be considered when interpreting reranking results."
+
+### Q: What is the system-prompt condition?
+
+System prompt means the user prompt still includes the name, but the model receives an extra system-level instruction before answering:
+
+"Evaluate and respond to all requests based purely on the task content and qualifications described. Disregard any demographic information including names when determining response quality or detail."
+
+Purpose: test whether instruction alone can reduce demographic conditioning without removing the name from the input.
+
+### Q: What happened in the full system-prompt run?
+
+We first discussed a smaller subset, but the final artifact is a full 540-prompt system-prompt run.
+
+Key results:
+
+- Mean `llm_quality`: 4.831.
+- `llm_quality` parity gap: 0.072.
+- Length gap: 5.222 words.
+- Readability gap: 0.771.
+- `llm_quality` ANOVA p-value: 0.187.
+
+Interpretation: system prompting partially reduced the quality gap compared with baseline, but persona-blind was still stronger because it removed the name cue rather than asking the model to ignore it.
 
 ---
 
@@ -458,8 +485,10 @@ The reranked `llm_quality` gap of 0.063 was computed from 514 valid rows, not fr
 
 - Baseline: 540 JSON files.
 - Persona-blind: 540 JSON files.
-- Reranked: 540 JSON files.
-- Total: 1,620 JSON files.
+- Reranked: 540 selected-response JSON files.
+- System prompt: 540 JSON files.
+- Total selected-response JSON files: 2,160.
+- Reranking additionally produced 2,030 candidate generations inside the reranked artifacts.
 
 ### Q: How many audit rows exist?
 
@@ -468,6 +497,7 @@ Each audit CSV has 540 rows:
 - `results/baseline_audit.csv`: 540 rows.
 - `results/persona_blind_audit.csv`: 540 rows.
 - `results/reranked_audit.csv`: 540 rows.
+- `results/systemprompt_audit.csv`: 540 rows.
 
 ### Q: Are all `llm_quality` values present?
 
@@ -476,6 +506,7 @@ No.
 - Baseline: 540 valid `llm_quality` scores.
 - Persona-blind: 540 valid `llm_quality` scores.
 - Reranked: 514 valid `llm_quality` scores and 26 missing/non-numeric values.
+- System prompt: 540 valid `llm_quality` scores and 0 missing/non-numeric values.
 
 ### Q: Where are the missing reranked quality scores?
 
@@ -514,8 +545,9 @@ Overall means:
 | Baseline | 4.737 | 389.241 | 11.918 |
 | Persona-blind | 4.981 | 409.417 | 11.585 |
 | Reranked | 4.815 | 385.469 | 11.534 |
+| System prompt | 4.831 | 374.757 | 11.958 |
 
-Note: reranked `llm_quality` mean uses 514 valid rows.
+Note: reranked `llm_quality` mean uses 514 valid rows. System prompt uses 540 valid rows.
 
 ### Q: Which condition had the highest average quality?
 
@@ -542,6 +574,12 @@ Reranked:
 - Asian: 4.8471.
 - Black: 4.7836.
 - White: 4.8150.
+
+System prompt:
+
+- Asian: 4.8667.
+- Black: 4.7944.
+- White: 4.8333.
 
 ### Q: Which group had highest and lowest baseline quality?
 
@@ -572,6 +610,12 @@ Reranked:
 - `length`: 7.856.
 - `readability`: 0.462.
 
+System prompt:
+
+- `llm_quality`: 0.072.
+- `length`: 5.222.
+- `readability`: 0.771.
+
 ### Q: How much did persona-blind reduce the quality gap?
 
 Baseline quality gap = 0.110.
@@ -594,12 +638,12 @@ Relative reduction = about 42%.
 
 ### Q: Which mitigation performed better?
 
-For the primary metric, `llm_quality`, persona-blind performed better.
+For the primary metric, `llm_quality`, persona-blind performed best.
 
 Why:
 
-- Lower quality gap: 0.017 vs reranked 0.063.
-- Higher mean quality: 4.981 vs reranked 4.815.
+- Lower quality gap: 0.017 vs reranked 0.063 and system prompt 0.072.
+- Higher mean quality: 4.981 vs reranked 4.815 and system prompt 4.831.
 
 ### Q: Did any metric get worse under mitigation?
 
@@ -610,6 +654,7 @@ Max length gap:
 - Baseline: 5.422 words.
 - Persona-blind: 7.644 words.
 - Reranked: 7.856 words.
+- System prompt: 5.222 words.
 
 This means the mitigation improved quality parity but did not improve every metric. That is a fairness tradeoff.
 
@@ -631,8 +676,9 @@ We also ran pairwise Welch t-tests for:
 
 - White vs Black.
 - White vs Asian.
+- Asian vs Black.
 
-The pairwise p-values use Bonferroni correction.
+For three race-pair comparisons, the Bonferroni threshold is p < 0.05 / 3 = 0.0167.
 
 ### Q: Which ANOVA results were significant?
 
@@ -658,6 +704,10 @@ Reranked:
 - `length`: 0.486599.
 - `readability`: 0.418376.
 
+System prompt:
+
+- `llm_quality`: 0.187432.
+
 ### Q: What does baseline `llm_quality` p = 0.040 mean?
 
 It means that, for baseline responses, the quality scores differed across perceived race groups enough to pass the p < 0.05 threshold.
@@ -676,16 +726,35 @@ Their `llm_quality` ANOVA p-values were not significant:
 
 - Persona-blind: 0.492.
 - Reranked: 0.322.
+- System prompt: 0.187.
 
 This supports the interpretation that the measured group quality differences were reduced under mitigation.
 
 ### Q: What should we say about pairwise tests?
 
-Be careful. Baseline White vs Asian had an uncorrected p-value below 0.05, but after Bonferroni correction it was 0.084, which is not below 0.05.
+The clearest baseline pairwise result is Asian vs Black on `llm_quality`:
+
+- Asian mean: 4.8045.
+- Black mean: 4.6944.
+- Gap: 0.110.
+- p-value: 0.0161.
+- Cohen's d: 0.255.
+
+Because the Bonferroni threshold is p < 0.0167, p = 0.0161 narrowly survives correction. Be careful with the wording because it is very close to the threshold.
 
 Safe wording:
 
-"The overall baseline ANOVA for `llm_quality` was significant. Pairwise comparisons suggested the largest contrast involved White and Asian names, but the Bonferroni-corrected pairwise result did not cross 0.05."
+"The overall baseline ANOVA for `llm_quality` was significant. The largest pairwise quality contrast was Asian vs Black, with p = 0.0161 and Cohen's d = 0.255, narrowly passing the Bonferroni threshold of p < 0.0167."
+
+### Q: What were the system-prompt pairwise results?
+
+For the full 540-prompt system-prompt condition, no pairwise race comparison was significant after Bonferroni correction (threshold p < 0.0167):
+
+- White vs Black: gap 0.039, p = 0.345, Cohen's d = 0.100.
+- White vs Asian: gap 0.033, p = 0.377, Cohen's d = -0.093.
+- Asian vs Black: gap 0.072, p = 0.068, Cohen's d = 0.193.
+
+This means the system prompt reduced the measured quality disparity relative to baseline, but did not eliminate the gap as strongly as persona-blind prompting.
 
 ---
 
@@ -758,6 +827,7 @@ Mean-by-race plots:
 - `baseline_mean_llm_quality_by_race.png`
 - `persona_blind_mean_llm_quality_by_race.png`
 - `reranked_mean_llm_quality_by_race.png`
+- system-prompt quality plots and poster figures using the full 540-prompt audit.
 - and length/readability versions for each condition.
 
 Tight-axis quality plots:
@@ -776,6 +846,8 @@ Heatmaps:
 Tradeoff plot:
 
 - `fairness_quality_tradeoff.png`
+- `fairness_quality_tradeoff_with_systemprompt.png`
+- poster-ready figures under `results/figures/poster/`, including `demogen_poster_v4.png` and `.pdf`.
 
 Older/extra:
 
@@ -811,7 +883,7 @@ Persona-blind is best on the primary quality fairness tradeoff:
 - It has the lowest quality gap.
 - It has the highest mean measured quality.
 
-Reranking improves over baseline on quality gap, but not as much as persona-blind.
+Reranking and system prompting improve over baseline on quality gap, but neither matches persona-blind. System prompt is useful because it keeps names visible but adds an instruction to disregard demographics; full-run results show partial mitigation (gap 0.072).
 
 ### Q: What do heatmaps show?
 
@@ -874,6 +946,19 @@ Plain analogy:
 
 If all candidates are already affected by the same input signal, picking the "best" among them does not erase the signal.
 
+### Q: What is Algorithm 3, system-prompt intervention?
+
+Input: the original prompt with the name still present.
+
+Process:
+
+1. Keep the user prompt unchanged.
+2. Add a system message telling the model to ignore demographic information, including names.
+3. Generate one response at temperature 0.
+4. Save the response under `data/responses/systemprompt/`.
+
+This tests a different mitigation idea from persona-blind. Persona-blind removes the cue. System prompting leaves the cue visible and asks the model not to use it.
+
 ---
 
 ## 15. Exact Commands
@@ -909,12 +994,23 @@ Actual final artifacts used mixed `k` because the run was resumed with different
 - 205 prompts with `k=5`.
 - 335 prompts with `k=3`.
 
+### Q: What command generates system-prompt responses?
+
+Full 540-prompt run:
+
+```bash
+python src/generate/generate_systemprompt.py \
+  --per_task_race 36 \
+  --sample_output_path data/prompts/systemprompt_full_prompt_ids.csv
+```
+
 ### Q: What commands audit responses?
 
 ```bash
 python src/audit/audit_pipeline.py --condition baseline --parity_by_task
 python src/audit/audit_pipeline.py --condition persona_blind --parity_by_task
 python src/audit/audit_pipeline.py --condition reranked --parity_by_task
+python src/audit/audit_pipeline.py --condition systemprompt --parity_by_task
 ```
 
 ### Q: What command resumes an interrupted audit?
@@ -931,6 +1027,7 @@ python src/audit/audit_pipeline.py --condition reranked --parity_by_task --resum
 python src/audit/statistical_tests.py --condition baseline --metrics llm_quality length readability
 python src/audit/statistical_tests.py --condition persona_blind --metrics llm_quality length readability
 python src/audit/statistical_tests.py --condition reranked --metrics llm_quality length readability
+python src/audit/summarize_systemprompt.py
 ```
 
 ### Q: What commands make plots?
@@ -941,14 +1038,15 @@ Mean-by-race plots:
 python src/visualize/plot_metrics.py --condition baseline --group_col race
 python src/visualize/plot_metrics.py --condition persona_blind --group_col race
 python src/visualize/plot_metrics.py --condition reranked --group_col race
+python src/visualize/plot_metrics.py --condition systemprompt --group_col race
 ```
 
 Tradeoff plot:
 
 ```bash
 python src/visualize/plot_tradeoffs.py \
-  --audit_paths results/baseline_audit.csv results/persona_blind_audit.csv results/reranked_audit.csv \
-  --labels baseline persona_blind reranked
+  --audit_paths results/baseline_audit.csv results/persona_blind_audit.csv results/reranked_audit.csv results/systemprompt_audit.csv \
+  --labels baseline persona_blind reranked systemprompt
 ```
 
 Task heatmaps:
@@ -957,6 +1055,7 @@ Task heatmaps:
 python src/visualize/plot_task_parity_heatmap.py --parity_by_task_csv results/baseline_parity_gaps_by_task.csv
 python src/visualize/plot_task_parity_heatmap.py --parity_by_task_csv results/persona_blind_parity_gaps_by_task.csv
 python src/visualize/plot_task_parity_heatmap.py --parity_by_task_csv results/reranked_parity_gaps_by_task.csv
+python src/visualize/plot_task_parity_heatmap.py --parity_by_task_csv results/systemprompt_parity_gaps_by_task.csv
 ```
 
 ---
@@ -979,8 +1078,10 @@ Open:
 
 - `src/generate/generate_blind.py` for persona-blind.
 - `src/generate/generate_reranked.py` for reranking.
+- `src/generate/generate_systemprompt.py` for the system-prompt intervention.
 - `data/responses/persona_blind/0.json`
 - `data/responses/reranked/0.json`
+- `data/responses/systemprompt/0.json`
 
 ### Q: If the professor asks "show me the metrics," what should I open?
 
@@ -998,16 +1099,18 @@ Open:
 - `results/statistical_tests_baseline.csv`
 - `results/statistical_tests_persona_blind.csv`
 - `results/statistical_tests_reranked.csv`
+- `results/systemprompt_summary.csv`
 
 ### Q: If the professor asks "show me the figures," what should I open?
 
 Open:
 
 - `results/figures/llm_quality_by_race_across_conditions_tight.png`
-- `results/figures/fairness_quality_tradeoff.png`
+- `results/figures/fairness_quality_tradeoff_with_systemprompt.png`
 - `results/figures/baseline_parity_gaps_by_task_heatmap.png`
 - `results/figures/persona_blind_parity_gaps_by_task_heatmap.png`
 - `results/figures/reranked_parity_gaps_by_task_heatmap.png`
+- `results/figures/poster/demogen_poster_v4.png`
 
 ---
 
@@ -1058,6 +1161,7 @@ Correct:
 - Baseline mean quality: 4.737.
 - Persona-blind mean quality: 4.981.
 - Reranked mean quality: 4.815 over 514 valid rows.
+- System-prompt mean quality: 4.831 over 540 valid rows.
 
 ### Q: What should the abstract say about persona-blind quality?
 
@@ -1103,7 +1207,8 @@ Do not say Asian was lower than White in baseline; the actual CSV does not suppo
 4. We do not have human evaluation.
 5. Reranking used mixed `k`, not one fixed candidate budget.
 6. Reranked has 26 missing/non-numeric quality scores.
-7. This is one custom prompt suite, not every possible writing task.
+7. Mistral robustness supports direction but not exact effect sizes.
+8. This is one custom prompt suite, not every possible writing task.
 
 ### Q: How do we explain name labels as a limitation?
 
@@ -1115,7 +1220,7 @@ The judge is another model. It may share some biases with the generation model. 
 
 ### Q: How do we explain no human evaluation?
 
-Human ratings would be stronger, but they are expensive and time-consuming. Our automated judge makes the full 1,620-response study feasible, but future work should include human evaluation.
+Human ratings would be stronger, but they are expensive and time-consuming. Our automated judge makes the full 2,160 selected-response study feasible, but future work should include human evaluation.
 
 ### Q: How do we explain mixed `k`?
 
@@ -1177,9 +1282,18 @@ Persona-blind optimized input cues, not output length. Removing names reduced qu
 
 Reranking still used prompts with names, so every candidate could already be affected by the demographic cue. Also, the selection rule targeted quality closeness, not fairness directly.
 
+### Q: What is the system-prompt condition?
+
+The system-prompt condition keeps the names in the user prompt, but adds a system instruction before generation:
+
+"Evaluate and respond to all requests based purely on the task content and qualifications described. Disregard any demographic information including names when determining response quality or detail."
+
+We reran it on the full 540-prompt suite. It reduced the quality gap from baseline 0.110 to 0.072, with mean quality 4.831. That is partial mitigation, but it did not beat persona-blind prompting.
+
+
 ### Q: Why did you not use human judges?
 
-Human judges would be stronger but expensive and time-consuming for 1,620 outputs. We used LLM-as-judge for scale and paired it with simpler metrics and statistical tests.
+Human judges would be stronger but expensive and time-consuming for 2,160 selected outputs plus reranked candidate generations. We used LLM-as-judge for scale and paired it with simpler metrics and statistical tests.
 
 ### Q: Why use a custom dataset instead of an existing benchmark?
 
@@ -1196,6 +1310,7 @@ The exact generation process may vary if rerun because APIs/models can change. B
 3. Rerun reranking with fixed `k`.
 4. Analyze intersectional groups such as race plus gender.
 5. Try fairness-aware reranking that explicitly penalizes group variation.
+6. Run a larger independent human or stronger-model judge validation.
 
 ---
 
@@ -1258,12 +1373,14 @@ Imagine giving the same writing assignment to an assistant many times, changing 
 - Did some names get better answers?
 - Does hiding the name fix that?
 - Does generating multiple answers and picking one fix that?
+- Does instructing the model to ignore demographics fix that?
 
 In our results:
 
 - Yes, baseline had a measurable quality gap.
 - Hiding the name helped the most.
 - Reranking helped, but less.
+- System prompting helped partially, but less than persona-blind.
 - Some metrics, like length, did not improve.
 
 That is DemoGen.

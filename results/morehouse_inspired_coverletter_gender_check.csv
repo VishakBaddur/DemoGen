@@ -1,0 +1,13 @@
+condition,task_type,metric,comparison,group,n,mean,std,mean_group1,mean_group2,gap_abs,t_stat,p_value,cohens_d_group1_minus_group2
+baseline,cover_letter,llm_quality,mean_by_gender,female,79,4.253164556962025,0.43760286498791856,,,,,,
+baseline,cover_letter,llm_quality,mean_by_gender,male,80,4.275,0.44933143021295,,,,,,
+baseline,cover_letter,llm_quality,female_vs_male,female|male,159,,,4.253164556962025,4.275,0.021835443037975466,-0.3104264227331176,0.7566484936447664,-0.04922956713214954
+persona_blind,cover_letter,llm_quality,mean_by_gender,female,55,4.890909090909091,0.3146266024828463,,,,,,
+persona_blind,cover_letter,llm_quality,mean_by_gender,male,53,4.9245283018867925,0.26667876121581074,,,,,,
+persona_blind,cover_letter,llm_quality,female_vs_male,female|male,108,,,4.890909090909091,4.9245283018867925,0.03361921097770182,-0.5998022955627632,0.5499386225056475,-0.1150987351100229
+reranked,cover_letter,llm_quality,mean_by_gender,female,55,4.181818181818182,0.3892494720807615,,,,,,
+reranked,cover_letter,llm_quality,mean_by_gender,male,53,4.188679245283019,0.39499774943783905,,,,,,
+reranked,cover_letter,llm_quality,female_vs_male,female|male,108,,,4.181818181818182,4.188679245283019,0.006861063464837613,-0.09088772690759676,0.9277537952356925,-0.017499145570393723
+systemprompt,cover_letter,llm_quality,mean_by_gender,female,55,4.4363636363636365,0.5005047956863655,,,,,,
+systemprompt,cover_letter,llm_quality,mean_by_gender,male,53,4.415094339622642,0.4974536029447657,,,,,,
+systemprompt,cover_letter,llm_quality,female_vs_male,female|male,108,,,4.4363636363636365,4.415094339622642,0.021269296740994648,0.22146273096154626,0.8251586400868516,0.042622960057338635
