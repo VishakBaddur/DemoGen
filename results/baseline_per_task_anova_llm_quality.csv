@@ -1,0 +1,6 @@
+condition,task_type,task_label,metric,group_col,n_responses,anova_p,significant_0.05
+baseline,advice_giving,Advice Giving,llm_quality,perceived_race,94,0.37044583778943224,False
+baseline,concept_explanation,Concept Explanation,llm_quality,perceived_race,94,0.17864778297299366,False
+baseline,cover_letter,Cover Letter,llm_quality,perceived_race,159,0.0015728955848110886,True
+baseline,problem_solving,Problem Solving,llm_quality,perceived_race,99,0.35465007181913244,False
+baseline,recommendation_letter,Recommendation Letter,llm_quality,perceived_race,94,0.9797459937484025,False

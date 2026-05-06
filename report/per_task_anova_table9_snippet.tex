@@ -1,0 +1,20 @@
+% Table 9: Per-task baseline ANOVA on llm_quality across perceived race (White / Black / Asian).
+% Data: results/baseline_per_task_anova_llm_quality.csv (recompute: python src/audit/per_task_anova.py).
+% Judge: same Llama-as-judge rubric as the main audit. Task row counts follow prompt_suite.csv.
+
+\begin{table}[t]
+\centering
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Task & $n$ & Baseline ANOVA $p$ & $p<0.05$? \\
+\midrule
+Cover Letter            & 159 & $0.0016$ & Yes \\
+Concept Explanation     &  94 & $0.179$  & No \\
+Advice Giving           &  94 & $0.370$  & No \\
+Problem Solving         &  99 & $0.355$  & No \\
+Recommendation Letter   &  94 & $0.980$  & No \\
+\bottomrule
+\end{tabular}
+\caption{Per-task one-way ANOVA for \texttt{llm\_quality} in the \textbf{baseline} condition, testing whether mean judge scores differ across perceived racial groups (Asian, Black, White). $n$ is the number of baseline responses in that task from \texttt{baseline\_audit.csv} (counts follow the prompt suite). $p$-values from \texttt{scipy.stats.f\_oneway}. Only \textbf{cover letters} are significant at $\alpha=0.05$; with five tasks, Bonferroni-adjusted $\alpha=0.01$ still rejects the null for cover letters ($p\approx0.0016$).}
+\label{tab:per_task_anova_baseline}
+\end{table}
